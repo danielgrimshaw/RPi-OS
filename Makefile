@@ -23,7 +23,12 @@
 
 # The toolchain to use. arm-none-eabi works, but there does exist 
 # arm-bcm2708-linux-gnueabi.
-ARMGNU ?= arm-none-eabi
+# This is only necessary if we are not compiling from a pi.
+# ARMGNU ?= arm-none-eabi
+
+# If not compiling from a pi, prefix each command with $(ARMGNU)- and
+# uncomment ARMGNU on line 27. We will also need to install
+# arm-none-eabi (use the install.sh command)
 
 # The intermediate directory for compiled object files.
 BUILD = build/
@@ -55,19 +60,19 @@ rebuild: all
 
 # Rule to make the listing file.
 $(LIST) : $(BUILD)output.elf
-	$(ARMGNU)-objdump -d $(BUILD)output.elf > $(LIST)
+	objdump -d $(BUILD)output.elf > $(LIST)
 
 # Rule to make the image file.
 $(TARGET) : $(BUILD)output.elf
-	$(ARMGNU)-objcopy $(BUILD)output.elf -O binary $(TARGET) 
+	objcopy $(BUILD)output.elf -O binary $(TARGET) 
 
 # Rule to make the elf file.
 $(BUILD)output.elf : $(OBJECTS) $(LINKER)
-	$(ARMGNU)-ld --no-undefined $(OBJECTS) -Map $(MAP) -o $(BUILD)output.elf -T $(LINKER)
+	ld --no-undefined $(OBJECTS) -Map $(MAP) -o $(BUILD)output.elf -T $(LINKER)
 
 # Rule to make the object files.
 $(BUILD)%.o: $(SOURCE)%.s $(BUILD)
-	$(ARMGNU)-as -I $(SOURCE) $< -o $@
+	as -I $(SOURCE) $< -o $@
 
 $(BUILD):
 	mkdir $@
